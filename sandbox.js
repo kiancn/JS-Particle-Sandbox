@@ -151,8 +151,8 @@ function setup() {
                 // do nothing
             }
         }
-    }, true, 60, 120)
-    keydownHandler.sprite = new RenderText("Test", keydownHandler, 65, "36px Courier New", "center", "blue")
+    }, true, ctx.canvas.width/2, 40)
+    keydownHandler.sprite = new RenderText("Press 1 to 4 for creative options", keydownHandler, 65, "36px Courier New", "center", "blue")
 
     GAMEINPUT.subscribeToKeyDown(keydownHandler)
 
