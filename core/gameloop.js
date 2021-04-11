@@ -31,8 +31,8 @@ class GameLoop {
  
 
         // plan next loop
-      //  setTimeout(SCENEMANAGER.GAMELOOP.doLoop,16)
-       requestAnimationFrame(SCENEMANAGER.GAMELOOP.doLoop)
+    //  setTimeout(SCENEMANAGER.GAMELOOP.doLoop,16)
+     requestAnimationFrame(SCENEMANAGER.GAMELOOP.doLoop)
     }
     
     setFPS = function (fps) {

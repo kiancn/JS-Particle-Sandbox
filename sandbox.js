@@ -3,7 +3,7 @@ const SCENEMANAGER = new SceneManager() // manages all objects in scene / canvas
 
 const field = []
 
-let dotSize = 9
+let dotSize = 15
 let distFactor = 1
 let dotDist = dotSize * distFactor
 
@@ -18,12 +18,11 @@ const colorSand = "#929222"
 const colorWater = "#106dcb"
 
 // placement variables
-let numberToPlace = 2
+let numberToPlace = 8
 let radiusFieldDistance = 4
 
 let drawingCursor
 let keydownHandler
-
 
 const ELEMENT = {
     water: 3,
@@ -44,20 +43,23 @@ function setup() {
     let canvas = document.getElementById("canvas")
     ctx = canvas.getContext("2d")
 
-    // sbHeight = 25
-    // sbWidth = 45
-
-
     _adjustCanvas()
+
     // calculate sandbox size dependent on canvas size, taking dot size and distance between dots into account
     sbHeight = Math.round((ctx.canvas.height) / (dotSize * distFactor))
     sbWidth = Math.round((ctx.canvas.width) / (dotSize * distFactor))
-
-
     console.log(sbHeight)
     console.log(sbWidth)
 
+    createFieldKeeper();
+    createDrawingCursorHandler();
+    createKeydownHandler();
 
+    GAMEINPUT.startDetectingInput()
+    SCENEMANAGER.GAMELOOP.doLoop()
+}
+
+function createFieldKeeper() {
     let fieldKeeper = new GameObject("Field Keeper", {
         update: function (gameObject) {
             updateField()
@@ -67,7 +69,9 @@ function setup() {
     })
     initField()
     SCENEMANAGER.includeInScene(fieldKeeper, 0)
+}
 
+function createDrawingCursorHandler() {
     // this GO 'places' dots on the canvas space
     drawingCursor = new GameObject("Pen", {
         drawing: false,
@@ -89,10 +93,15 @@ function setup() {
 
                 switch (currentPlacementElement) {
                     case ELEMENT.water:
-                        field[fieldIndex] = ELEMENT.water;
+                        //2 field[fieldIndex] = ELEMENT.water;
+                        for (i = 0; i < numberToPlace; i++) {
+                            setField(fieldIndex, ELEMENT.water, getRandomInInterval(-10, 20), getRandomInInterval(-5, 10))
+                        }
                         break;
                     case ELEMENT.sand:
                         field[fieldIndex] = ELEMENT.sand;
+                        field[fieldIndex - 3 * sbWidth + (rand % 10)] = ELEMENT.sand;
+                        field[fieldIndex + 3 * sbWidth + 4] = ELEMENT.sand;
                         break;
                     case ELEMENT.ground:
                         field[fieldIndex] = ELEMENT.ground;
@@ -120,12 +129,14 @@ function setup() {
     document.addEventListener("mouseup", drawingCursor.qualia.mouseUp)
     GAMEINPUT.subscribeToMouseDown(drawingCursor)
     SCENEMANAGER.includeInScene(drawingCursor, 0, 2)
+}
 
+function createKeydownHandler() {
     keydownHandler = new GameObject("Keydown Handler", {
         update: function (gameObject) {
         },
         playerInput: function (keyStroke, gameObject) {
-            gameObject.sprite.text = keyStroke
+            gameObject.sprite.text = keyStroke + " NOT DEFINED"
 
             try {
 
@@ -145,21 +156,18 @@ function setup() {
                     case 4 :
                         currentPlacementElement = ELEMENT.none;
                         gameObject.sprite.text = keyStroke + " NOTHING"
-                        break;
+
                 }
             } catch (e) {
-                // do nothing
+
             }
         }
-    }, true, ctx.canvas.width/2, 40)
-    keydownHandler.sprite = new RenderText("Press 1 to 4 for creative options", keydownHandler, 65, "36px Courier New", "center", "blue")
+    }, true, ctx.canvas.width / 2, 40)
+    keydownHandler.sprite = new RenderText("Press 1 to 4 for creative options", keydownHandler, 65, "36px Courier New", "center", "green")
 
     GAMEINPUT.subscribeToKeyDown(keydownHandler)
 
     SCENEMANAGER.includeInScene(keydownHandler)
-
-    GAMEINPUT.startDetectingInput()
-    SCENEMANAGER.GAMELOOP.doLoop()
 }
 
 function initField() {
@@ -187,9 +195,13 @@ function initField() {
 let rand = 1
 
 function updateField() {
+    // rand += Math.floor(HEART.timeSinceStart)
+
+
     for (i = sbHeight; i > 0; i--) {
+        rand++
         for (j = sbWidth; j > 0; j--) {
-            rand++
+            //   rand++
             gridPos = (i * sbWidth) + j
             interpretFieldPosition(gridPos, field[gridPos])
         }
@@ -221,10 +233,13 @@ function findFieldFillType(field) {
     }
 }
 
+function setField(fieldIndex, element, modX, modY) {
+    field[fieldIndex - (rand % modY) * sbWidth - (rand % modX)] = element;
+}
+
 function drawGridNumberOverlay() {
     for (i = 0; i < sbHeight; i++) {
         for (j = 0; j < sbWidth; j++) {
-
             // draw helpful dot indexes
             ctx.fillStyle = "grey"
             ctx.fillText("" + ((i * sbWidth) + j), drawingOffsetX + j * dotDist, drawingOffsetY + i * dotDist + (dotDist / 2))
@@ -255,60 +270,48 @@ function applySandRules(gridIndex) {
         adjustField(gridIndex, surSquares.DOWN, ELEMENT.sand)
         return
     }
-    if (rand % 2 === 0) {
-        if (field[surSquares.DOWN_LEFT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_LEFT, ELEMENT.sand)
-            return
-        }
-        if (field[surSquares.DOWN_RIGHT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_RIGHT, ELEMENT.sand)
-        }
-    } else {
-        if (field[surSquares.DOWN_RIGHT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_RIGHT, ELEMENT.sand)
-            return
-        }
-        if (field[surSquares.DOWN_LEFT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_LEFT, ELEMENT.sand)
 
-        }
+    rand % 1 === 0 ?
+        checkAndPossibleAdjust(gridIndex, ELEMENT.sand, surSquares.DOWN_LEFT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.sand, surSquares.DOWN_RIGHT, ELEMENT.none)
+        :
+        checkAndPossibleAdjust(gridIndex, ELEMENT.sand, surSquares.DOWN_RIGHT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.sand, surSquares.DOWN_LEFT, ELEMENT.none)
+
+}
+
+function checkAndPossibleAdjust(originIndex, actualElement, checkedIndex, elementToCheckFor) {
+    if (field[checkedIndex] === elementToCheckFor &&
+        inBounds(checkedIndex)) {
+        adjustField(originIndex, checkedIndex, actualElement)
+        return true
     }
+    return false
 }
 
 function applyWaterRules(gridIndex) {
     let surSquares = new SurroundingSquares(gridIndex)
 
-    if (field[surSquares.DOWN] === ELEMENT.none) {
+    if (field[surSquares.DOWN] === ELEMENT.none && inBounds(surSquares.DOWN)) {
         adjustField(gridIndex, surSquares.DOWN, ELEMENT.water)
         return
     }
-    if (rand % 2 === 1) {
-        if (field[surSquares.DOWN_RIGHT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_RIGHT, ELEMENT.water)
-        } else if (field[surSquares.DOWN_LEFT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_LEFT, ELEMENT.water)
-        } else if (field[surSquares.LEFT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.LEFT, ELEMENT.water)
-        } else if (field[surSquares.RIGHT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.RIGHT, ELEMENT.water)
-        }
-    } else {
-        if (field[surSquares.DOWN_LEFT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_LEFT, ELEMENT.water)
-            return
-        }
-        if (field[surSquares.DOWN_RIGHT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.DOWN_RIGHT, ELEMENT.water)
-            return
-        }
-        if (field[surSquares.LEFT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.LEFT, ELEMENT.water)
-            return
-        }
-        if (field[surSquares.RIGHT] === ELEMENT.none) {
-            adjustField(gridIndex, surSquares.RIGHT, ELEMENT.water)
-        }
-    }
+
+    rand % 2 === 0 ?
+        checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+
+        :
+        checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
+}
+
+function inBounds(fieldIndex) {
+    return !(fieldIndex === -333)
 }
 
 function adjustField(oldFieldPos, newFieldPos, element) {
@@ -316,10 +319,10 @@ function adjustField(oldFieldPos, newFieldPos, element) {
     field[newFieldPos] = element
 }
 
+/* Instances contain field indexes of surrounding squares243 */
 class SurroundingSquares {
     constructor(gridIndex) {
         const yNumber = Math.floor(gridIndex / sbWidth)
-        const rowZero = yNumber - gridIndex
 
         const LOC_UP = gridIndex - sbWidth
         const LOC_UP_LEFT = gridIndex - sbWidth - 1
@@ -331,13 +334,13 @@ class SurroundingSquares {
         const LOC_DOWN_RIGHT = gridIndex + sbWidth + 1
 
         this.UP = LOC_UP >= -1 ? LOC_UP : -333 // minus 333 is the blocked value
-        this.UP_LEFT = LOC_UP_LEFT >= 0 ? LOC_UP_LEFT : -333
-        this.UP_RIGHT = LOC_UP_RIGHT >= 0 ? LOC_UP_RIGHT : -333
-        this.LEFT = LOC_LEFT >= 0 ? LOC_LEFT : -333
-        this.RIGHT = LOC_RIGHT >= 0 ? LOC_RIGHT : -333
+        this.UP_LEFT = LOC_UP_LEFT % sbWidth === 0 ? -333 : LOC_UP_LEFT
+        this.UP_RIGHT = LOC_UP_RIGHT % sbWidth === 0 ? -333 : LOC_UP_RIGHT
+        this.LEFT = LOC_LEFT % sbWidth === 0 ? -333 : LOC_LEFT
+        this.RIGHT = LOC_RIGHT % sbWidth === 0 ? -333 : LOC_RIGHT
         this.DOWN = LOC_DOWN >= 0 ? LOC_DOWN : -333
-        this.DOWN_LEFT = LOC_DOWN_LEFT >= 0 ? LOC_DOWN_LEFT : -333
-        this.DOWN_RIGHT = LOC_DOWN_RIGHT >= 0 ? LOC_DOWN_RIGHT : -333
+        this.DOWN_LEFT = LOC_DOWN_LEFT % sbWidth === 0 ? -333 : LOC_DOWN_LEFT
+        this.DOWN_RIGHT = LOC_DOWN_RIGHT % sbWidth === 0 ? -333 : LOC_DOWN_RIGHT
     }
 }
 
@@ -352,5 +355,6 @@ function fieldIndexFromXY(x, y) {
 }
 
 function getRandomInInterval(min, size) {
-    return min + Math.random() * size
+    console.log(min + (Math.random() * size))
+    return Math.floor(min + (Math.random() * size))
 }
