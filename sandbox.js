@@ -45,6 +45,7 @@ const ELEMENT = {
     blocked: -1
 }
 
+let indexesUpdatedLastTurn = [0]
 
 let currentPlacementElement = ELEMENT.sand
 
@@ -83,6 +84,9 @@ function createFieldKeeper() {
     let fieldKeeper = new GameObject("Field Keeper", {
         update: function (gameObject) {
             updateField()
+            updateField()
+         //   updateField()
+            //   updateField()
             drawGrid()
             //   drawGridNumberOverlay()
         }
@@ -222,7 +226,7 @@ function createFPSTextObject() {
 
             // update only every second frame
             if (framesSinceStart % 10 === 0) {
-                gameObject.sprite.text = ("FPS " +Math.floor(framesSinceStart / (gameObject.qualia.deltaHistory / 1000))).toString()
+                gameObject.sprite.text = ("FPS " + Math.floor(framesSinceStart / (gameObject.qualia.deltaHistory / 1000))).toString()
             }
         }
     }, true)
@@ -262,37 +266,55 @@ function initField() {
 }
 
 let tiltIndicator = 1 // simulation behaves differently depending on the order of traversal og the field, this moderates that
+let localDelta = 0.1 //
+
+let delta = performance.now()
 
 function updateField() {
 
     let size = fieldSize, gridPos
     //  resetting all status fields to not changed this turn
+    const lastTurnStatusesField = JSON.parse(JSON.stringify(fieldStatuses))
+
     while (size--) fieldStatuses[size] = false;
 
+    delta = performance.now() - delta;
+
+    localDelta += delta
+
+
+    if (localDelta > Math.sin(HEART.timeSinceStart) * (Math.random() * 360)) {
+        localDelta = 0
+    }
 
     // walking
 
-    if (tiltIndicator < 4) {
+    // if (HEART.timeSinceStart%2>1 || HEART.timeSinceStart%5===1) {
+    // if (tiltIndicator % 2 === 0) {
+        if (localDelta < (Math.cos(HEART.timeSinceStart))*150) {
 
         for (i = sbHeight; i > 0; i--) {
-            rand++
+
             for (j = sbWidth; j > 0; j--) {
+                rand = Math.floor(Math.random() * 10)
                 gridPos = (i * sbWidth) + j
-                interpretFieldPosition(gridPos, field[gridPos])
+                if(lastTurnStatusesField[gridPos]=== false) interpretFieldPosition(gridPos, field[gridPos])
             }
         }
         tiltIndicator++
     } else {
         for (i = 0; i < sbHeight; i++) {
-            rand++
+
             for (j = 0; j < sbWidth; j++) {
+                rand = Math.floor(Math.random() * 10)
                 gridPos = (i * sbWidth) + j
                 interpretFieldPosition(gridPos, field[gridPos])
             }
         }
+        tiltIndicator++
     }
 
-    if (tiltIndicator > 7) {
+    if (tiltIndicator > 70) {
         tiltIndicator = 0
     }
 
@@ -325,9 +347,17 @@ function findFieldFillType(field) {
     }
 }
 
+function registerFieldIndexUpdate(index) {
+    fieldStatuses[index] = true;
+    indexesUpdatedLastTurn.push(index);
+}
+
 function setFields_RhumbusFormation(amountToPlace, fieldIndex, element, modX, modY) {
     for (i = 0; i < amountToPlace; i++) {
-        field[fieldIndex - (fieldIndex % (modX+i)) + (modY * sbWidth)] = element; // rhumbus
+        let dotIndex = fieldIndex - (fieldIndex % (modX + i)) + (modY * sbWidth)
+        field[dotIndex] = element; // rhumbus
+        // register new boxes for update new turn
+        registerFieldIndexUpdate(4)
     }
 }
 
@@ -405,12 +435,12 @@ function applySandRules(gridIndex) {
 
         ) {
 
-            if(field[surSquares.LEFT]===ELEMENT.none){
+            if (field[surSquares.LEFT] === ELEMENT.none) {
                 adjustField(gridIndex, surSquares.LEFT, ELEMENT.none, ELEMENT.water)
                 adjustField(gridIndex, surSquares.DOWN, ELEMENT.sand, ELEMENT.water)
                 return
             }
-            if(field[surSquares.RIGHT]===ELEMENT.none){
+            if (field[surSquares.RIGHT] === ELEMENT.none) {
                 adjustField(gridIndex, surSquares.RIGHT, ELEMENT.none, ELEMENT.water)
                 adjustField(gridIndex, surSquares.DOWN, ELEMENT.sand, ELEMENT.water)
                 return
@@ -434,21 +464,55 @@ function applySandRules(gridIndex) {
 function applyWaterRules(gridIndex) {
     let surSquares = fieldSurroundingSquares[gridIndex]
 
-    rand % 2 === 0 ?
-        checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+    if (rand % 4 > 2) {
 
-        :
-        checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
+        rand % 2 === 0 ?
+            checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
+
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_LEFT, ELEMENT.none)
+
+            :
+            checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_RIGHT, ELEMENT.none)
+
+    } else {
+
+        rand % 2 === 1 ?
+
+            checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+
+            :
+            checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_RIGHT, ELEMENT.none)
+
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+            //   || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.DOWN_LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_RIGHT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.LEFT, ELEMENT.none)
+            || checkAndPossibleAdjust(gridIndex, ELEMENT.water, surSquares.UP_LEFT, ELEMENT.none)
 
 
+
+
+
+    }
 }
 
 function applyGasRules(gridIndex) {
