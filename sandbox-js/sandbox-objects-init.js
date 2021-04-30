@@ -6,7 +6,7 @@ function createFieldKeeper() {
             if(framesSinceStart%2===0) {
                 updateField()
                 updateField()
-                updateField()
+             //   updateField()
 
                 //   drawGridNumberOverlay()
             }
