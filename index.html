@@ -40,8 +40,11 @@
     <script src="core/FMath.js"></script>
 
     <!-- actual square drawer -->
-<!--    <script src="drawsheet.js"></script>-->
-    <script src="sandbox.js"></script>
+
+    <script src="sandbox-js/sandbox-global-variables.js"></script>
+    <script src="sandbox-js/surrounding-squares.js"></script>
+    <script src="sandbox-js/sandbox-objects-init.js"></script>
+    <script src="sandbox-js/sandbox.js"></script>
 
     <title>Particle Sandbox</title>
 </head>
@@ -49,11 +52,16 @@
 <body>
 <canvas id="canvas" width="1920" height="1080"></canvas>
 
-<img id="placeWater" src="resources/images/elements/water.png" height="50" width="40" style="position: absolute; top:25px;left:60px;color: aqua;font-size: 56px" onclick="switchElement('water')">Water</img>
-<div id="placeSand"  style="position: absolute; top:100px;left:80px;color: aqua;font-size: 56px" onclick="switchElement('sand')">Sand</div>
-<div id="placeGas"   style="position: absolute; top:175px;left:100px;color: aqua;font-size: 56px" onclick="switchElement('gas')">Smoke</div>
-<div id="placeGround"style="position: absolute; top:25px;left:220px;color: aqua;font-size: 56px" onclick="switchElement('ground')">Ground</div>
-<div id="placeNothin"style="position: absolute; top:100px;left:220px;color: aqua;font-size: 56px" onclick="switchElement('nothing')">Erase</div>
+<img id="placeWater" src="resources/images/elements/water%20block.png"
+     height="58" width="51" style="position: absolute; top:25px;left:60px;color: aqua;font-size: 56px" onclick="switchElement('water')" alt="Water"/>
+<img id="placeSand" src="resources/images/rpg2ddeserttileset/PNG/stones_3.png"
+     height="58" width="60" style="position: absolute; top:100px;left:60px;color: aqua;font-size: 56px" onclick="switchElement('sand')" alt="Sand"/>
+<img id="placeGas"    src="resources/images/elements/Smoke.png"
+     height="62" width="62" style="position: absolute; top:175px;left:60px;color: aqua;font-size: 56px" onclick="switchElement('gas')" alt="Smoke"/>
+<img id="placeGround" src="resources/images/elements/brown%20block.png"
+     height="58" width="50" style="position: absolute; top:25px;left:170px;color: aqua;font-size: 56px" onclick="switchElement('ground')" alt="Ground"/>
+<img id="placeNothing" src="resources/images/rpg2ddeserttileset/PNG/decor_6.png"
+     height="53" width="95" style="position: absolute; top:100px;left:155px;color: aqua;font-size: 56px" onclick="switchElement('nothing')" alt="Erase"/>
 
 </body>
 
