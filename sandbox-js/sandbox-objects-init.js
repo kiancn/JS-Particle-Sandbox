@@ -3,21 +3,20 @@ function createFieldKeeper() {
     let fieldKeeper = new GameObject("Field Keeper", {
         update: function (gameObject) {
 
-            let previousActivity = fieldStatuses.splice()
+            if(framesSinceStart%2===0) {
+                updateField()
+                updateField()
+                updateField()
 
-
-            updateField()
-            // updateField()
-            //  updateField()
+                //   drawGridNumberOverlay()
+            }
 
             drawGrid()
 
-            if(showActivity) {
-                console.log("Showing activity")
+            if (showActivity) { // showActivity is set via the keydownhandler (big 'A' press)
                 drawGridActivity()
             }
 
-            //   drawGridNumberOverlay()
         }
     })
     initField()
@@ -33,18 +32,20 @@ function createDrawingCursorHandler() {
 
             if (gameObject.qualia.drawing) {
 
+                const baseX = GAMEINPUT.mouse.x
+                const baseY = GAMEINPUT.mouse.y
+
+                const offsetX = baseX - drawingOffsetX
+                const offsetY = baseY - drawingOffsetY
+
+                const gridX = Math.floor(offsetX / dotDist)
+                const gridY = Math.floor(offsetY / dotDist)
+
+                fieldIndex = gridX + (gridY * sbWidth)
+
                 if(curRand%4===0) {
                     // OVERALL: calculate cell touched
-                    const baseX = GAMEINPUT.mouse.x
-                    const baseY = GAMEINPUT.mouse.y
 
-                    const offsetX = baseX - drawingOffsetX
-                    const offsetY = baseY - drawingOffsetY
-
-                    const gridX = Math.floor(offsetX / dotDist)
-                    const gridY = Math.floor(offsetY / dotDist)
-
-                    fieldIndex = gridX + (gridY * sbWidth)
 
                     switch (currentPlacementElement) {
                         case ELEMENT.water:
@@ -71,13 +72,12 @@ function createDrawingCursorHandler() {
                     }
 
 
-
-                surSqaures = new SurroundingSquares(fieldIndex)
+                }
+            surSqaures = new SurroundingSquares(fieldIndex)
 
                 ctx.fillStyle = "white"
                 ctx.fillText("[X: " + gridX + "] [Y: " + gridY + "] ::: field[" + fieldIndex + "]", 25, 25)
                 ctx.fillText(surSqaures.toString(), 25, 40)
-                }
             }
         },
         playerInput: function () {
@@ -150,16 +150,27 @@ function createKeydownHandler() {
 function createFPSTextObject() {
     fpsRenderTextGameObject = new GameObject("FPS Text", {
 
-        deltaHistory: 0,
+        deltaTime: 0,
+        lastTime: 0,
+        accumDelta: 0,
         update: function (gameObject) {
 
             framesSinceStart = framesSinceStart + 1
 
-            gameObject.qualia.deltaHistory = performance.now() - gameObject.qualia.deltaHistory
+            gameObject.qualia.deltaTime =  HEART.timeSinceStart - gameObject.qualia.lastTime
+            gameObject.qualia.lastTime = HEART.timeSinceStart
+
+            gameObject.qualia.accumDelta += gameObject.qualia.deltaTime
+
+         //   console.log("Last time:\t" + gameObject.qualia.lastTime + "\tNow:\t" + HEART.timeSinceStart + "\tdT\t" + gameObject.qualia.deltaTime)
 
             // update only every second frame
-            if (framesSinceStart % 10 === 0) {
-                gameObject.sprite.text = ("FPS " + Math.floor(framesSinceStart / (gameObject.qualia.deltaHistory / 1000))).toString()
+            if (framesSinceStart % 170 === 0) {
+
+
+               gameObject.sprite.text = ("FPS " + Math.floor(1/(gameObject.qualia.accumDelta/170) )).toString()
+                // gameObject.sprite.text = ("FPS " + Math.floor(framesSinceStart / (gameObject.qualia.deltaHistory / 1000))).toString()
+                gameObject.qualia.accumDelta = 0
             }
         }
     }, true)

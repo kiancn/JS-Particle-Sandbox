@@ -4,6 +4,9 @@ window.addEventListener("load", function () {
 
 // initialize all variables and start scene
 function setup() {
+
+
+
     let canvas = document.getElementById("canvas")
     ctx = canvas.getContext("2d")
 
@@ -22,6 +25,16 @@ function setup() {
     createDrawingCursorHandler();
     createKeydownHandler();
     createFPSTextObject();
+
+    // this is slightly dirty as it violates
+    document.onkeydown = function (e) {
+        if (e.altKey && e.key === "1") {
+            toggleElement('infoContainer')
+        }
+    }
+
+    makeDragElement(document.getElementById("infoContainer"))
+
 
     GAMEINPUT.startDetectingInput()
     SCENEMANAGER.GAMELOOP.doLoop()
@@ -67,18 +80,19 @@ previousFieldStatuses = [...fieldStatuses]
 function drawGridActivity() {
 
 
-
     for (let i = 0; i < sbHeight; i++) {
         for (let j = 0; j < sbWidth; j++) {
             // draw the right element at the right spot, an elemental dot, that is
 
             if(fieldStatuses[(i * sbWidth) + j]===true){
-                ctx.fillStyle = "#0926b8"
+
                 if (previousFieldStatuses[(i * sbWidth) + j]===true){
-                    ctx.fillStyle = "#ac00d7"
+                    ctx.fillStyle = "#d7003d"
+                } else{
+                    ctx.fillStyle = "#de9007"
                 }
             } else if (previousFieldStatuses[(i * sbWidth) + j]===true){
-                ctx.fillStyle = "#8a8481"
+                ctx.fillStyle = "#c3bab5"
             }
             else{
                 ctx.fillStyle = "rgba(255, 255, 255, 0.1)"
@@ -87,6 +101,16 @@ function drawGridActivity() {
         }
     }
     previousFieldStatuses = [...fieldStatuses]
+}
+
+function drawGridNumberOverlay() {
+    for (i = 0; i < sbHeight; i++) {
+        for (j = 0; j < sbWidth; j++) {
+            // draw helpful dot indexes
+            ctx.fillStyle = "grey"
+            ctx.fillText("" + ((i * sbWidth) + j), drawingOffsetX + j * dotDist, drawingOffsetY + i * dotDist + (dotDist / 2))
+        }
+    }
 }
 
 function findFieldFillType(field) {
@@ -202,15 +226,6 @@ function setFields_Box(amountToPlace, fieldIndex, element, extent = 3) {
     }
 }
 
-function drawGridNumberOverlay() {
-    for (i = 0; i < sbHeight; i++) {
-        for (j = 0; j < sbWidth; j++) {
-            // draw helpful dot indexes
-            ctx.fillStyle = "grey"
-            ctx.fillText("" + ((i * sbWidth) + j), drawingOffsetX + j * dotDist, drawingOffsetY + i * dotDist + (dotDist / 2))
-        }
-    }
-}
 
 function interpretFieldPosition(gridIndex, type) {
 
@@ -349,15 +364,18 @@ function applyGasRules(gridIndex) {
     curRand % 2 === 0 ?
         checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.LEFT, ELEMENT.none)
         || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.UP_LEFT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.UP_RIGHT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.RIGHT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.DOWN_RIGHT, ELEMENT.none)
+     //   || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.UP_RIGHT, ELEMENT.none)
+     //   || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.RIGHT, ELEMENT.none)
+     //   || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.DOWN_RIGHT, ELEMENT.none)
         || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.DOWN_LEFT, ELEMENT.none)
         :
         checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.RIGHT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.LEFT, ELEMENT.none)
         || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.UP_RIGHT, ELEMENT.none)
-        || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.UP_LEFT, ELEMENT.none)
+     //   || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.UP_LEFT, ELEMENT.none)
+     //   || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.LEFT, ELEMENT.none)
+      //  || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.DOWN_LEFT, ELEMENT.none)
+        || checkAndPossibleAdjust(gridIndex, ELEMENT.gas, surSquares.DOWN_RIGHT, ELEMENT.none)
+
 
 }
 

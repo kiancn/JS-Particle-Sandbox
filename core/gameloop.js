@@ -5,7 +5,7 @@ class GameLoop {
         HEART.beat() // updates the timetracker
 
         _adjustCanvas() // functions from renderer2D
-        _clearCanvas() 
+   //     _clearCanvas()
 
         // Round one: UPDATE all object states
         for (let i = 0; i < SCENEMANAGER.LAYERS.length; i++) {
