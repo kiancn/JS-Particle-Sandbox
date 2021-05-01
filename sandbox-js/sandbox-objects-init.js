@@ -3,13 +3,12 @@ function createFieldKeeper() {
     let fieldKeeper = new GameObject("Field Keeper", {
         update: function (gameObject) {
 
-            if(framesSinceStart%2===0) {
+         //   if(framesSinceStart%2===0) {
                 updateField()
                 updateField()
-             //   updateField()
-
+               // updateField()
                 //   drawGridNumberOverlay()
-            }
+       //    }
 
             drawGrid()
 
@@ -43,7 +42,7 @@ function createDrawingCursorHandler() {
 
                 fieldIndex = gridX + (gridY * sbWidth)
 
-                if(curRand%4===0) {
+                if(curRand%2===0) {
                     // OVERALL: calculate cell touched
 
 
@@ -139,7 +138,7 @@ function createKeydownHandler() {
             }
         }
     }, true, ctx.canvas.width / 2, 40)
-    keydownHandler.sprite = new RenderText("You can draw elements! Press 1 - 5 for options.",
+    keydownHandler.sprite = new RenderText("You can draw elements! Keys 1 - 5 selected elements.",
         keydownHandler, 65, "36px Consolas", "center", "green")
 
     GAMEINPUT.subscribeToKeyDown(keydownHandler)
