@@ -1,14 +1,13 @@
-
 function createFieldKeeper() {
     let fieldKeeper = new GameObject("Field Keeper", {
         update: function (gameObject) {
 
-         //   if(framesSinceStart%2===0) {
-                updateField()
-                updateField()
-               // updateField()
-                //   drawGridNumberOverlay()
-       //    }
+               if(framesSinceStart%2===0) {
+            updateField()
+            updateField()
+           //  updateField()
+            //   drawGridNumberOverlay()
+                }
 
             drawGrid()
 
@@ -42,7 +41,7 @@ function createDrawingCursorHandler() {
 
                 fieldIndex = gridX + (gridY * sbWidth)
 
-                if(curRand%2===0) {
+                if (curRand % 2 === 0) {
                     // OVERALL: calculate cell touched
 
 
@@ -53,7 +52,7 @@ function createDrawingCursorHandler() {
                             setFields_Box(numberToPlace, fieldIndex + getRandomInInterval(-3, 6), ELEMENT.water)
                             break;
                         case ELEMENT.sand:
-                            setFields_RhumbusFormation(numberToPlace*2, fieldIndex, ELEMENT.sand,
+                            setFields_RhumbusFormation(numberToPlace * 2, fieldIndex, ELEMENT.sand,
                                 getRandomInInterval(-10, 20), getRandomInInterval(-15, 30))
                             break;
                         case ELEMENT.ground:
@@ -72,7 +71,7 @@ function createDrawingCursorHandler() {
 
 
                 }
-            surSqaures = new SurroundingSquares(fieldIndex)
+                surSqaures = new SurroundingSquares(fieldIndex)
 
                 ctx.fillStyle = "white"
                 ctx.fillText("[X: " + gridX + "] [Y: " + gridY + "] ::: field[" + fieldIndex + "]", 25, 25)
@@ -101,14 +100,21 @@ function createKeydownHandler() {
             switch (keyStroke) {
                 case "m" :
                     numberToPlace = numberToPlace - 1 < 1 ? 1 : numberToPlace - 1
+                    gameObject.sprite.text = "Number placing " + numberToPlace + " each frame mouse button is pushed";
                     break;
                 case "k" :
                     numberToPlace = numberToPlace + 1 < 1 ? 1 : numberToPlace + 1
+                    gameObject.sprite.text = "Number placing " + numberToPlace + " each frame mouse button is pushed";
                     break
                 case "A" :
                     showActivity = !showActivity
+                    if (showActivity) {
+                        gameObject.sprite.text = "Now showing recent changes overlay (expect FPS drop)";
+                    } else {
+                        gameObject.sprite.text = "Now showing just simulation";
+                    }
             }
-            gameObject.sprite.text = "Number placing " + numberToPlace + " each frame mouse button is pushed";
+
 
             try {
 
@@ -138,8 +144,8 @@ function createKeydownHandler() {
             }
         }
     }, true, ctx.canvas.width / 2, 40)
-    keydownHandler.sprite = new RenderText("You can draw elements! Keys 1 - 5 selected elements.",
-        keydownHandler, 65, "36px Consolas", "center", "green")
+    keydownHandler.sprite = new RenderText("Draw by clicking! Click icons or press 1 - 5 to select elements. Press ALT + 1 for info.",
+        keydownHandler, 65, "25px Consolas", "center", "green")
 
     GAMEINPUT.subscribeToKeyDown(keydownHandler)
 
@@ -156,18 +162,18 @@ function createFPSTextObject() {
 
             framesSinceStart = framesSinceStart + 1
 
-            gameObject.qualia.deltaTime =  HEART.timeSinceStart - gameObject.qualia.lastTime
+            gameObject.qualia.deltaTime = HEART.timeSinceStart - gameObject.qualia.lastTime
             gameObject.qualia.lastTime = HEART.timeSinceStart
 
             gameObject.qualia.accumDelta += gameObject.qualia.deltaTime
 
-         //   console.log("Last time:\t" + gameObject.qualia.lastTime + "\tNow:\t" + HEART.timeSinceStart + "\tdT\t" + gameObject.qualia.deltaTime)
+            //   console.log("Last time:\t" + gameObject.qualia.lastTime + "\tNow:\t" + HEART.timeSinceStart + "\tdT\t" + gameObject.qualia.deltaTime)
 
             // update only every second frame
-            if (framesSinceStart % 170 === 0) {
+            if (framesSinceStart % 15 === 0) {
 
 
-               gameObject.sprite.text = ("FPS " + Math.floor(1/(gameObject.qualia.accumDelta/170) )).toString()
+                gameObject.sprite.text = ("FPS " + Math.floor(1 / (gameObject.qualia.accumDelta / 15))).toString()
                 // gameObject.sprite.text = ("FPS " + Math.floor(framesSinceStart / (gameObject.qualia.deltaHistory / 1000))).toString()
                 gameObject.qualia.accumDelta = 0
             }

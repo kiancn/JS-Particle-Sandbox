@@ -33,14 +33,13 @@ function setup() {
         }
     }
 
-
-
     makeDragElement(document.getElementById("infoContainer"))
-
 
     GAMEINPUT.startDetectingInput()
     SCENEMANAGER.GAMELOOP.doLoop()
 }
+
+
 
 function initField() {
     totalPushed = 0
@@ -94,7 +93,7 @@ function drawGridActivity() {
                     ctx.fillStyle = "#de9007"
                 }
             } else if (previousFieldStatuses[(i * sbWidth) + j]===true){
-                ctx.fillStyle = "#c3bab5"
+                ctx.fillStyle = "#aa5ccb"
             }
             else{
                 ctx.fillStyle = "rgba(255, 255, 255, 0.1)"
@@ -102,7 +101,7 @@ function drawGridActivity() {
             ctx.fillRect(drawingOffsetX + j * dotDist, drawingOffsetY + i * dotDist, dotSize, dotSize)
         }
     }
-    previousFieldStatuses = [...fieldStatuses]
+    // previousFieldStatuses = [...fieldStatuses]
 }
 
 function drawGridNumberOverlay() {
@@ -136,6 +135,8 @@ function findFieldFillType(field) {
 function updateField() {
 
     let size = fieldSize, gridPos
+
+    previousFieldStatuses = [...fieldStatuses]
 
     while (size--) fieldStatuses[size] = false;
 
