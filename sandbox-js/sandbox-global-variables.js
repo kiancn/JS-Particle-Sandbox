@@ -27,7 +27,7 @@ const fieldStatuses = []
 const fieldSurroundingSquares = []
 
 /*size of individual dot*/
-let dotSize = 13
+let dotSize = 10
 let distFactor = 1 // proportional distance between dots (actual distance will change with dot size distance)
 let dotDist = dotSize * distFactor
 

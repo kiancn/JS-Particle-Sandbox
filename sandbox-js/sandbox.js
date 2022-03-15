@@ -1,3 +1,6 @@
+// contains the logic specific to the sandbox, both simulation and drawing
+// all variables are declared in sandbox-global-variables
+
 window.addEventListener("load", function () {
     setup()
 })
